@@ -1,0 +1,54 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.5'
+	id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.boilerplate'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation "net.logstash.logback:logstash-logback-encoder:7.4"
+
+	implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+	implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+
+	implementation "org.flywaydb:flyway-core:9.22.3"
+	implementation "org.flywaydb:flyway-commandline:9.1.6"
+
+	implementation 'io.micrometer:micrometer-core:1.9.4'
+	implementation 'io.micrometer:micrometer-registry-statsd:1.9.4'
+
+	implementation 'org.apache.commons:commons-lang3:3.17.0'
+	implementation 'redis.clients:jedis:5.1.4'
+
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
