@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import retrofit2.http.HeaderMap;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -33,11 +32,8 @@ import static net.logstash.logback.marker.Markers.append;
 public class ControllerMetricsAspect {
 
     private static final String TAG_ERROR_CODES = "error_codes";
-
     private static final String ERRORS_KEY = "errors";
-
     private static final String PING_ROUTE = "/ping";
-
 
     @Autowired
     private MeterRegistryConfig meterRegistryConfig;
@@ -71,7 +67,6 @@ public class ControllerMetricsAspect {
                 metricData.addAll(customHeaders);
             }
         }
-
 
         metricRegistry.counter(getNameWithStatsdPrefix("api"), metricData.toArray(new String[0])).increment();
         log.debug(getLogstashMarker(className, methodName, requestAttributeTag),
@@ -142,8 +137,6 @@ public class ControllerMetricsAspect {
             MDC.clear();
         }
     }
-
-
 
     private void setRequiredMDC(RequestAttributeTag requestAttributeTag) {
         HttpServletRequest request = requestAttributeTag.getHttpServletRequest();
@@ -224,11 +217,11 @@ public class ControllerMetricsAspect {
             add(TAG_METHOD_NAME);
             add(method);
             add(TAG_PARTNER);
-            add(TAG_POD_NAME);  // vm-123-123
-//            add(requestAttributeTag.getPodNameTag());
+            add(TAG_POD_NAME);
+            add(requestAttributeTag.getPodNameTag());
             add(TAG_REQUEST_URI);
             add(requestAttributeTag.getCleanedRequestURI());
-            add(TAG_REQUEST_METHOD); // get post
+            add(TAG_REQUEST_METHOD);
             add(requestAttributeTag.getRequestURIMethod());
         }};
     }
@@ -238,7 +231,5 @@ public class ControllerMetricsAspect {
                 .and(append(TAG_METHOD_NAME, method))
                 .and(append(TAG_REQUEST_URI, requestAttributeTag.getRequestURI()))
                 .and(append(TAG_REQUEST_METHOD, method));
-//                .and(append(TAG_PARTNER, requestAttributeTag.getPartnerTag()))
-//                .and(append(TAG_POD_NAME, requestAttributeTag.getPodNameTag()));
     }
 }

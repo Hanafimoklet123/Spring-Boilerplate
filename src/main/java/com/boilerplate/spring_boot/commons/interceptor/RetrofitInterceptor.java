@@ -14,14 +14,19 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okio.Buffer;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.MDC;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.AntPathMatcher;
 import retrofit2.Invocation;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.Locale;
+
+import static net.logstash.logback.marker.Markers.append;
 
 @Slf4j
 @Lazy
@@ -30,23 +35,51 @@ public class RetrofitInterceptor implements Interceptor {
 
     private final MetricService metricService;
 
-    private final boolean isOkHttp;
+    private final boolean isOkhttp;
 
     private final String appName;
 
+    private final Map<String, List<EndpointEntity>> endpointsToSkip;
+
     private final AntPathMatcher antPathMatcher;
 
-    private final Map<String, List<EndpointEntity>> endpointsToSkip;
     private final MaskingDataInterceptor maskingDataInterceptor;
 
+    public RetrofitInterceptor(
+            MetricService metricService,
+            MaskingDataInterceptor maskingDataInterceptor,
+            String appName,
+            boolean isOkhttp
+    ) {
+        this.metricService = metricService;
+        this.maskingDataInterceptor = maskingDataInterceptor;
+        this.appName = appName;
+        this.isOkhttp = isOkhttp;
+        this.antPathMatcher = new AntPathMatcher();
+        this.endpointsToSkip = new HashMap<>();
+    }
 
-    @NotNull
+    public RetrofitInterceptor(
+            MetricService metricService,
+            MaskingDataInterceptor maskingDataInterceptor,
+            String appName,
+            boolean isOkhttp,
+            Map<String, List<EndpointEntity>> endpointsToSkip
+    ) {
+        this.metricService = metricService;
+        this.maskingDataInterceptor = maskingDataInterceptor;
+        this.appName = appName;
+        this.isOkhttp = isOkhttp;
+        this.antPathMatcher = new AntPathMatcher();
+        this.endpointsToSkip = endpointsToSkip;
+    }
+
     @Override
-    public Response intercept(@NotNull Chain chain) throws IOException {
+    public Response intercept(Chain chain) throws IOException {
         String retrofitRequestID = UUID.randomUUID().toString();
         MDC.put("retrofitRequestID", retrofitRequestID);
 
-        try{
+        try {
             Request request = chain.request();
 
             if (shouldSkip(request)) {
@@ -58,9 +91,9 @@ public class RetrofitInterceptor implements Interceptor {
             String apiName = getApiName(request.url());
             String requestName = invocationTag != null ? getClientInvocationMethod(invocationTag) : "";
             Object requestBody = null;
-            if (isOkHttp && invocationTag == null) {
+            if (isOkhttp && invocationTag == null) {
                 requestBody = getRequestPayload(request);
-            }else  {
+            } else {
                 requestBody = request.body();
             }
 
@@ -70,14 +103,16 @@ public class RetrofitInterceptor implements Interceptor {
                 host = request.url().host();
             }
 
-            JsonObject requestBodyMasked = maskingDataInterceptor.maskingBody(requestBody, method, MaskingDataInterceptor.REQUEST_KEY, invocationTag);
+            JsonObject requestBodyMasked = maskingDataInterceptor.maskingBody(requestBody, method, apiName, MaskingDataInterceptor.REQUEST_KEY, invocationTag);
+
             log.info("--> Calling {} {} {} {}", method, request.url(), requestBodyMasked == null ? requestBody : requestBodyMasked, request.headers());
 
             Map<String, String> tags = getMetricInterceptor(apiName, requestName, method, host);
 
-            metricService.incrementCounterWithoutServicePrefix("http_client_api", tags);
+            metricService.incrementCounterWithoutServicePrefix("digisign_http_client_api", tags);
 
             try {
+
                 request = setCorrelationIdToDownstreamServiceRequest(request);
 
                 Response response = chain.proceed(request);
@@ -87,9 +122,9 @@ public class RetrofitInterceptor implements Interceptor {
                 tags.put(Constants.RESPONSE_CODE, getNullSafeString(responseCode));
 
                 if (response.isSuccessful()) {
-                    metricService.incrementCounterWithoutServicePrefix("http_client_api_success", tags);
+                    metricService.incrementCounterWithoutServicePrefix("digisign_http_client_api_success", tags);
                 } else {
-                    metricService.incrementCounterWithoutServicePrefix("http_client_api_failure", tags);
+                    metricService.incrementCounterWithoutServicePrefix("digisign_http_client_api_failure", tags);
                 }
 
                 long timeElapsed = response.receivedResponseAtMillis() - response.sentRequestAtMillis();
@@ -127,19 +162,7 @@ public class RetrofitInterceptor implements Interceptor {
         } finally {
             MDC.remove("retrofitRequestID");
         }
-
     }
-
-    public RetrofitInterceptor(MetricService metricService, boolean isOkHttp, String appName, AntPathMatcher antPathMatcher, Map<String, List<EndpointEntity>> endpointsToSkip, MaskingDataInterceptor maskingDataInterceptor) {
-        this.metricService = metricService;
-        this.isOkHttp = isOkHttp;
-        this.appName = appName;
-        this.antPathMatcher = antPathMatcher;
-        this.endpointsToSkip = endpointsToSkip;
-        this.maskingDataInterceptor = maskingDataInterceptor;
-    }
-
-
 
     protected Request setCorrelationIdToDownstreamServiceRequest(Request request) {
         if (request != null && request.header(Constants.CORRELATION_ID_HEADER) == null) {
@@ -169,6 +192,7 @@ public class RetrofitInterceptor implements Interceptor {
     private String getNullSafeString(String value) {
         return value != null ? value : "";
     }
+
     private String getApiName(HttpUrl url) {
 
         if (url == null || url.encodedPath() == null) {
@@ -189,6 +213,7 @@ public class RetrofitInterceptor implements Interceptor {
     protected String getClientInvocationMethod(Invocation invocationTag) {
         return invocationTag.method() != null ? invocationTag.method().getName() : "";
     }
+
     protected Invocation getInvocationTag(Chain chain) {
 
         if (chain.call() == null) {
@@ -201,6 +226,7 @@ public class RetrofitInterceptor implements Interceptor {
 
         return chain.call().request().tag(Invocation.class);
     }
+
     private String getRequestPayload(Request request) {
         if (request.body() == null) {
             return null;
@@ -250,5 +276,4 @@ public class RetrofitInterceptor implements Interceptor {
         @SerializedName("endpointPattern")
         private final String endpointPattern;
     }
-
 }

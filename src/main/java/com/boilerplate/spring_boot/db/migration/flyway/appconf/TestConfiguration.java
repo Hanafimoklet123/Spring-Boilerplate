@@ -1,13 +1,11 @@
 package com.boilerplate.spring_boot.db.migration.flyway.appconf;
 
 import java.util.Map;
-import java.util.Objects;
 
 @SuppressWarnings("PMD.SimplifiedTernary")
 public class TestConfiguration extends ApplicationConfiguration {
 
     private Map<String, String> testConfig;
-
     public TestConfiguration(Map<String, String> testConfig) {this.testConfig = testConfig;}
 
     @Override

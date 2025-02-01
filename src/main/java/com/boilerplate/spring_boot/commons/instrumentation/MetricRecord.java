@@ -9,7 +9,6 @@ import lombok.Data;
 public class MetricRecord {
 
     String metricName;
-
     MetricData metricData;
 
     @Data
@@ -18,7 +17,6 @@ public class MetricRecord {
         String source;
         String className;
         String methodName;
-        String partner;
         String onboardingPartner;
     }
 }

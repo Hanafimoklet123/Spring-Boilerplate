@@ -2,7 +2,6 @@ package com.boilerplate.spring_boot.db.migration.flyway.appconf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.boilerplate.spring_boot.db.migration.flyway.appconf.MissingRequiredConfigurationException;
 
 import java.io.FileNotFoundException;
 import java.util.HashSet;

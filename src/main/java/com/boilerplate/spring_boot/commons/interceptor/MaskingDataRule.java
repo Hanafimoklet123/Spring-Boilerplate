@@ -6,9 +6,9 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MaskingDataRules {
-    private String field;
+public class MaskingDataRule {
 
+    private String field;
     private String[] fieldTree;
 
     @SerializedName("start_index_masking")

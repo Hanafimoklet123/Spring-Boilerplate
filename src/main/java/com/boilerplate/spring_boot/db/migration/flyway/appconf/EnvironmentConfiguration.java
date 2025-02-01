@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 class EnvironmentConfiguration extends ApplicationConfiguration {
 
     private Logger logger = LoggerFactory.getLogger(EnvironmentConfiguration.class);
-
     public EnvironmentConfiguration() {
         logger.debug("loading environment configuration");
     }

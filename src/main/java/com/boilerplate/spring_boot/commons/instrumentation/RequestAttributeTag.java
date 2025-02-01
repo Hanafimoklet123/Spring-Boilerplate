@@ -7,7 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Enumeration;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -16,43 +20,34 @@ public class RequestAttributeTag {
 
     private HttpServletRequest request;
     private String upstreamClassName;
-
+    private static final String PODNAME_KEY = "POD_NAME";
     private static final Pattern NONUUID_SUBPATH_REGEX = Pattern.compile("^(?:v[0-9]|([A-Za-z-_]+))$");
 
-    protected RequestAttributeTag(String upstreamClassName) {
+    public RequestAttributeTag(String upstreamClassName) {
         this.upstreamClassName = upstreamClassName;
         request = getHttpServletRequest();
     }
 
     protected HttpServletRequest getHttpServletRequest() {
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
-        if(requestAttributes == null) {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (requestAttributes == null) {
             return null;
         }
 
         return requestAttributes.getRequest();
+
     }
 
-//    public String getPartnerTag() {
-//        String partner = "";
-//        try {
-//            partner = Objects.requireNonNull(request.getHeader(ONEKYC_PARTNER_HEADER_KEY));
-//        } catch (Exception e) {
-//            log.debug("Exception {} in {} while getting partner tag.", e.getMessage(), upstreamClassName);
-//        }
-//        return partner;
-//    }
-//
-//    public String getPodNameTag() {
-//        String podName = "";
-//        try {
-//            podName = Objects.requireNonNull(getSystemEnv(PODNAME_KEY));
-//        } catch (Exception e) {
-//            log.debug("Exception {} in {} while getting podName tag.", e.getMessage(), upstreamClassName);
-//        }
-//        return podName;
-//    }
+    public String getPodNameTag() {
+        String podName = "";
+        try {
+            podName = Objects.requireNonNull(getSystemEnv(PODNAME_KEY));
+        } catch (Exception e) {
+            log.debug("Exception {} in {} while getting podName tag.", e.getMessage(), upstreamClassName);
+        }
+        return podName;
+    }
 
     public String getRequestURI() {
         String requestURI = "";

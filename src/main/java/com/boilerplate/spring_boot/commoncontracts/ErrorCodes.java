@@ -3,9 +3,9 @@ package com.boilerplate.spring_boot.commoncontracts;
 public class ErrorCodes {
 
 
-    private static final String GENERIC_ERROR_CODE = "1000";
-    private static final String INVALID_REQUEST = "1001";
-    private static final String INVALID_REQUEST_CODE = "1002";
+    public static final String GENERIC_ERROR_CODE = "1000";
+    public static final String INVALID_REQUEST = "1001";
+    public static final String INVALID_REQUEST_CODE = "1002";
 
     public enum CODE {
         BAD_REQUEST("BAD_REQUEST", "1002"),

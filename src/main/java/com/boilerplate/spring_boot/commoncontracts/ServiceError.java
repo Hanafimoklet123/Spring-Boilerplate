@@ -11,5 +11,5 @@ public class ServiceError {
     private String code;
     private String entity;
     private String message;
-    private String details;
+    private Object details;
 }
