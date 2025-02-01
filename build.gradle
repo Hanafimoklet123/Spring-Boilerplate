@@ -38,6 +38,7 @@ dependencies {
 	implementation "net.logstash.logback:logstash-logback-encoder:7.4"
 	implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 	implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+	implementation "org.springframework.boot:spring-boot-starter-data-jdbc:2.7.3"
 
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation "org.flywaydb:flyway-core:9.22.3"
@@ -82,7 +83,7 @@ jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				minimum = 0.08
+				minimum = 0.21
 			}
 		}
 	}
