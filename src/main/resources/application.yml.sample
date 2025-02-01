@@ -9,7 +9,7 @@ ROOT_LOG_LEVEL: ERROR
 
 # DB Configuration
 DB_HOST: localhost
-DB_NAME: esign_service
+DB_NAME: postgres
 DB_PORT: 5432
 DB_USERNAME: postgres
 DB_PASSWORD: password
