@@ -1,7 +1,6 @@
 package com.boilerplate.spring_boot.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.gson.JsonArray;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

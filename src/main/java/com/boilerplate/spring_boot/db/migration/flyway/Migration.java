@@ -32,7 +32,7 @@ public class Migration {
                                 config.getValueAsString("DB_NAME")
                         ),
                         config.getValueAsString("DB_USERNAME"),
-                        config.getValueAsString("DB_NAME"))
+                        config.getValueAsString("DB_PASSWORD"))
                 .baselineOnMigrate(true)
                 .validateMigrationNaming(true)
                 .validateOnMigrate(true);
